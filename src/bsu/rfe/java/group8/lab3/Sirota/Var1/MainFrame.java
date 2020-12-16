@@ -169,3 +169,78 @@ public class MainFrame extends JFrame {
         hBoxRange.setPreferredSize(new Dimension(new Double(hBoxRange.getMaximumSize().getWidth()).intValue(), new Double(hBoxRange.getMaximumSize().getHeight()).intValue() * 2));
         // ставим область в верхнюю часть
         getContentPane().add(hBoxRange, BorderLayout.NORTH);
+
+        //Создаем кнопку вычислить
+        JButton buttonCalc = new JButton("Вычислить");
+        //задаем действие на нажатие на кнопку
+        buttonCalc.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    //считать значения начала и конца отрезка, шага
+                    Double from = Double.parseDouble(textFieldFrom.getText());
+                    Double to = Double.parseDouble(textFieldTo.getText());
+                    Double step = Double.parseDouble(textFieldStep.getText());
+                    //создаем новый экземпляр модели таблицы на основе считывания данных
+                    data = new GornerTableModel(from, to, step, MainFrame.this.coefficients);
+                    //новый экземпляр таблицы создаем
+                    JTable table = new JTable(data);
+                    //установить в качестве визуализатора ячеек для класса Double разработанный визуализатор
+                    table.setDefaultRenderer(Double.class, renderer);
+                    //установить размер строки в 30
+                    table.setRowHeight(30);
+                    //удалить все вложенные элементы из контейнера hBoxResult
+                    hBoxResult.removeAll();
+                    //Добавить в hBoxResult таблицу с полосами прокрутки
+                    hBoxResult.add(new JScrollPane(table));
+                    //обновить область содержания главного меню
+                    getContentPane().validate();
+                    //Пометить ряд элементов меню как доступные
+                    saveToTextMenuItem.setEnabled(true);
+                    saveToGraphicsMenuItem.setEnabled(true);
+                    searchValueMenuItem.setEnabled(true);
+                } catch (NumberFormatException ex) {
+                    //В случае ошибки преобразования чисел показать сообщение об ошибке
+                    JOptionPane.showMessageDialog(MainFrame.this, "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        //создать кнопку очистить поля
+        JButton buttonClear = new JButton("Очистить поля");
+        buttonClear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                textFieldFrom.setText("0.0");
+                textFieldTo.setText("1.0");
+                textFieldStep.setText("0.1");
+                //удаляем все вложенные элементы контейнера
+                hBoxResult.removeAll();
+                //помещаем в контейнер пустую панель
+                hBoxResult.add(new JPanel());
+                //помечаем элементы меню недоступными
+                saveToTextMenuItem.setEnabled(false);
+                saveToGraphicsMenuItem.setEnabled(false);
+                searchValueMenuItem.setEnabled(false);
+                //обновить область содержания главного меню
+                getContentPane().validate();
+            }
+        });
+        //Все кнопки в контейнер помещаем
+        Box hBoxButtons = Box.createHorizontalBox();
+        hBoxButtons.setBorder(BorderFactory.createBevelBorder(1));
+        hBoxButtons.add(Box.createHorizontalGlue());
+        hBoxButtons.add(buttonCalc);
+        hBoxButtons.add(Box.createVerticalStrut(30));
+        hBoxButtons.add(buttonClear);
+        hBoxButtons.add(Box.createHorizontalGlue());
+        //установим размер области вавным удвоенному мин.,что бы при компановке область не сдавили
+        hBoxButtons.setPreferredSize(new Dimension(new Double(hBoxButtons.getMaximumSize().getWidth()).intValue(), new Double(hBoxButtons.getMaximumSize().getHeight()).intValue() * 2));
+        // ставим область в верхнюю часть
+        getContentPane().add(hBoxButtons, BorderLayout.SOUTH);
+        //область для вывода результата пока что пустая
+        hBoxResult = Box.createHorizontalBox();
+        hBoxResult.add(new JPanel());
+        getContentPane().add(hBoxResult, BorderLayout.CENTER);
+    }
+
+    
