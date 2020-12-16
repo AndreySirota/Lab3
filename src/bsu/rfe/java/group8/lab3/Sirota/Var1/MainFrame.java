@@ -242,5 +242,72 @@ public class MainFrame extends JFrame {
         hBoxResult.add(new JPanel());
         getContentPane().add(hBoxResult, BorderLayout.CENTER);
     }
+    protected void saveToGraphicsFile(File selectedFile) {
+        try {
+            //создать новый байтовый поток вывода, направленный в указанный файл
+            DataOutputStream out = new DataOutputStream(new FileOutputStream(selectedFile));
+            //записать в поток вывода попарно значение Х в точке, значение многчлена в точке
+            for (int i = 0; i < data.getRowCount(); i++) {
+                out.writeDouble((Double) data.getValueAt(i, 0));
+                out.writeDouble((Double) data.getValueAt(i, 1));
+            }
+            //закрыть поток вывода
+            out.close();
+        } catch (Exception e) {
+            //можно не обрабатывать так как мы файл создаем, а не открываем
+        }
+    }
 
-    
+    protected void saveToTextFile(File selectedFile) {
+        try {
+            //создать новый символьный поток вывода, направленный в указанный файл
+            PrintStream out = new PrintStream(selectedFile);
+            //записать в поток вывода заглавочное сведение
+            out.println("Рузультаты тубулирования многчлена по схеме Горнера");
+            out.println("Многочлен");
+            for (int i = 0; i < coefficients.length; i++) {
+                out.print(coefficients[i] + "*X^" + (coefficients.length - i - 1));
+                if (i != coefficients.length - 1) {
+                    out.print(" + ");
+                }
+            }
+            out.println("");
+            out.println("Интервал от " + data.getFrom() + " до " + data.getTo() + "с шагом " + data.getStep());
+            out.println("====================================================");
+            //записать в поток вывода значения в точках
+            for (int i = 0; i < data.getRowCount(); i++) {
+                out.println("Значение в точке " + data.getValueAt(i, 0) + " равно " + data.getValueAt(i, 1));
+            }
+            //закрыть поток
+            out.close();
+        } catch (FileNotFoundException e) {
+            //можно не обрабатывать так как мы файл создаем, а не открываем
+        }
+    }
+
+    public static void main(String[] args) {
+        //Если не задано и одного аргумента
+        //продолжать невозможно
+        if (args.length == 0) {
+            System.out.println("Невозможно тубулировать многочлен, для которого не задано ни одного коэфициента");
+            System.exit(-1);
+        }
+        //зарезервировать местав массиве столько, сколько аргументов командной строки
+        Double[] coefficients = new Double[args.length];
+        int i = 0;
+        try {
+            //перебираем аргументы и пытаемся преобразовать в Double
+            for (String arg : args) {
+                coefficients[i++] = Double.parseDouble(arg);
+            }
+        } catch (NumberFormatException ex) {
+            //если преобразование не возможно сообщаем об ошибке
+            System.out.println("Ошибка преобразования строки '" + args[i] + "' в число типа Double");
+            System.exit(-2);
+        }
+        MainFrame frame = new MainFrame(coefficients);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}
+
